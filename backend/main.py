@@ -36,6 +36,16 @@ def generate_sensor_data():
     # Ağ trafiği (simüle)
     network_speed = 50 + 30 * math.sin(timestamp / 5) + random.uniform(-10, 10)
     
+    # Sinyal gücü (daha dinamik)
+    signal_strength = 75 + 25 * math.sin(timestamp / 7) + random.uniform(-5, 5)
+
+    # Cihaz durumu
+    device_status = random.choices(
+        population=['online', 'offline', 'error'],
+        weights=[0.9, 0.05, 0.05],
+        k=1
+    )[0]
+
     return {
         "timestamp": timestamp,
         "temperature": round(temperature, 2),
@@ -43,7 +53,9 @@ def generate_sensor_data():
         "cpu_usage": round(cpu_usage, 2),
         "memory_usage": round(memory_usage, 2),
         "network_speed": round(max(0, network_speed), 2),
-        "status": "active" if random.random() > 0.1 else "warning"
+        "signal_strength": round(max(0, min(100, signal_strength)), 2),
+        "device_status": device_status,
+        "status": "active" if device_status == 'online' else "warning"
     }
 
 @app.get("/data")
