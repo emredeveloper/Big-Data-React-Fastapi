@@ -90,16 +90,33 @@ async def generate_sensor_data_async():
     memory_usage = memory.percent
     # Ağ trafiği (simüle)
     network_speed = 50 + 30 * math.sin(timestamp / 5) + random.uniform(-10, 10)
+<<<<<<< HEAD
 
     # Temel veri
     base_data = {
+=======
+    
+    # Sinyal gücü (daha dinamik)
+    signal_strength = 75 + 25 * math.sin(timestamp / 7) + random.uniform(-5, 5)
+
+    # Cihaz durumu
+    device_status = random.choices(
+        population=['online', 'offline', 'error'],
+        weights=[0.9, 0.05, 0.05],
+        k=1
+    )[0]
+
+    return {
+>>>>>>> 6e124e0b84a829f19afc3c23f92755513a9c263e
         "timestamp": timestamp,
         "temperature": round(temperature, 2),
         "humidity": round(humidity, 2),
         "cpu_usage": round(cpu_usage, 2),
         "memory_usage": round(memory_usage, 2),
         "network_speed": round(max(0, network_speed), 2),
-        "status": "active" if random.random() > 0.1 else "warning"
+        "signal_strength": round(max(0, min(100, signal_strength)), 2),
+        "device_status": device_status,
+        "status": "active" if device_status == 'online' else "warning"
     }
     
     # ML analizi ekle
