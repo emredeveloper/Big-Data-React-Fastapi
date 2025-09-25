@@ -1,0 +1,199 @@
+/* ML Dashboard Stilleri */
+.ml-dashboard-container {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.ml-dashboard-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2rem;
+}
+
+.loading, .error, .no-data {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+}
+
+/* Performans Kartları */
+.performance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.perf-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.perf-card:hover {
+  transform: translateY(-5px);
+}
+
+.perf-card h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.perf-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.perf-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Grafikler */
+.ml-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.chart-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chart-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+/* Model Durumu */
+.model-status {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.model-status h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 8px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.status-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.status-value {
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.status-value.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-value.inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Yenile Bölümü */
+.refresh-section {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.refresh-button {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refresh-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ml-dashboard-container {
+    padding: 16px;
+  }
+  
+  .performance-cards {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+  
+  .perf-card {
+    padding: 16px;
+  }
+  
+  .perf-value {
+    font-size: 2rem;
+  }
+  
+  .ml-charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .status-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

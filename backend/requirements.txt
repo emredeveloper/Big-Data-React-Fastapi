@@ -2,3 +2,9 @@ fastapi
 uvicorn
 websockets
 psutil
+structlog
+httpx
+scikit-learn
+numpy
+pandas
+sqlalchemy

@@ -1,4 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
+import { WS_URL } from './config';
+import Settings from './Settings';
+import MLDashboard from './MLDashboard';
+import { ToastContainer, useToast } from './Toast';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -9,12 +13,24 @@ import './App.css';
 function App() {
   const [streamData, setStreamData] = useState([]);
   const [currentData, setCurrentData] = useState(null);
+  const [connState, setConnState] = useState('connecting'); // connecting | open | closed
+  const [currentPage, setCurrentPage] = useState('dashboard'); // dashboard | settings | ml
   const wsRef = useRef();
+  const { toasts, addToast, removeToast, showInfo, showWarning } = useToast();
 
   useEffect(() => {
-    // Open WebSocket for real-time stream
-    wsRef.current = new WebSocket('ws://localhost:8000/ws');
-    wsRef.current.onmessage = e => {
+    // Open WebSocket for real-time stream with auto-reconnect
+    let retry = 0;
+
+    const connect = () => {
+      setConnState('connecting');
+      wsRef.current = new WebSocket(WS_URL);
+      wsRef.current.onopen = () => {
+        retry = 0;
+        setConnState('open');
+        showInfo('WebSocket bağlantısı kuruldu');
+      };
+      wsRef.current.onmessage = e => {
       const data = JSON.parse(e.data);
       
       // Zaman damgasını okunabilir formata çevir
@@ -26,10 +42,29 @@ function App() {
       
       setCurrentData(formattedData);
       setStreamData(prev => [formattedData, ...prev].slice(0, 50));
+      
+      // Anomali tespit edildiğinde uyarı göster
+      if (formattedData.is_anomaly) {
+        showWarning(`Anomali tespit edildi! Skor: ${formattedData.anomaly_score?.toFixed(3)}`);
+      }
+      };
+      wsRef.current.onerror = console.error;
+      wsRef.current.onclose = () => {
+        setConnState('closed');
+        showWarning('WebSocket bağlantısı kesildi, yeniden bağlanıyor...');
+        const timeout = Math.min(30000, 1000 * Math.pow(2, retry));
+        retry += 1;
+        setTimeout(() => connect(), timeout);
+      };
     };
-    wsRef.current.onerror = console.error;
+    connect();
 
-    return () => wsRef.current && wsRef.current.close();
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.onclose = null;
+        wsRef.current.close();
+      }
+    };
   }, []);
 
   // Pie chart için CPU ve Memory verileri
@@ -41,9 +76,26 @@ function App() {
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
 
-  return (
-    <div className="dashboard-container">
-      <h1 className="dashboard-title">🔥 Canlı Veri Dashboard</h1>
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'settings':
+        return <Settings />;
+      case 'ml':
+        return <MLDashboard />;
+      default:
+        return renderDashboard();
+    }
+  };
+
+  const renderDashboard = () => (
+    <>
+      <h1 className="dashboard-title">🔥 Canlı Veri Dashboard
+        <span className={`connection-badge ${
+          connState === 'open' ? 'conn-open' : connState === 'connecting' ? 'conn-connecting' : 'conn-closed'
+        }`}>
+          {connState === 'open' ? 'Bağlı' : connState === 'connecting' ? 'Bağlanıyor' : 'Kopuk'}
+        </span>
+      </h1>
       
       {/* Mevcut Değerler */}
       {currentData && (
@@ -69,6 +121,27 @@ function App() {
               {currentData.status === 'active' ? 'Aktif' : 'Uyarı'}
             </p>
           </div>
+          
+          {currentData.is_anomaly && (
+            <div className="value-card anomaly-card">
+              <h3>🚨 Anomali Tespit Edildi!</h3>
+              <p className="anomaly-score">
+                Skor: {currentData.anomaly_score?.toFixed(3) || 'N/A'}
+              </p>
+            </div>
+          )}
+          
+          {currentData.temperature_prediction && (
+            <div className="value-card prediction-card">
+              <h3>🔮 Sıcaklık Tahmini</h3>
+              <p className="prediction-value">
+                {currentData.temperature_prediction.toFixed(1)}°C
+              </p>
+              <p className="prediction-confidence">
+                Güven: %{(currentData.prediction_confidence * 100).toFixed(0)}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -191,6 +264,45 @@ function App() {
           </table>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <div className="app-container">
+      {/* Navigation */}
+      <nav className="app-nav">
+        <div className="nav-brand">
+          <h2>🔥 Big Data AI</h2>
+        </div>
+        <div className="nav-links">
+          <button 
+            className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('dashboard')}
+          >
+            📊 Dashboard
+          </button>
+          <button 
+            className={`nav-link ${currentPage === 'ml' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('ml')}
+          >
+            🤖 ML Dashboard
+          </button>
+          <button 
+            className={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('settings')}
+          >
+            ⚙️ Ayarlar
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="app-content">
+        {renderPage()}
+      </div>
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 }

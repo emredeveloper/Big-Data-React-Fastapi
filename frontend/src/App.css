@@ -1,3 +1,58 @@
+/* App Ana Container */
+.app-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.app-nav {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-brand h2 {
+  color: white;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-link {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.app-content {
+  min-height: calc(100vh - 80px);
+}
+
 /* Dashboard Ana Container */
 .dashboard-container {
   padding: 20px;
@@ -10,6 +65,19 @@
   color: #333;
   margin-bottom: 30px;
 }
+
+/* Bağlantı durumu rozeti */
+.connection-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.conn-open { background: #e6ffed; color: #1a7f37; border: 1px solid #abdfb9; }
+.conn-connecting { background: #fff8e1; color: #8a6d3b; border: 1px solid #f0d58c; }
+.conn-closed { background: #ffecec; color: #a61b1b; border: 1px solid #f2a7a7; }
 
 /* Değer Kartları */
 .value-cards-grid {
@@ -135,4 +203,69 @@
 .status-warning {
   color: #dc3545;
   font-weight: bold;
+}
+
+/* Anomali ve Tahmin Kartları */
+.anomaly-card {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.anomaly-card h3 {
+  color: white;
+  margin: 0;
+}
+
+.anomaly-score {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.prediction-card {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  color: white;
+}
+
+.prediction-card h3 {
+  color: white;
+  margin: 0;
+}
+
+.prediction-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.prediction-confidence {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 4px 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+  .app-nav {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-link {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
 }

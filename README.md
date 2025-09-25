@@ -1,37 +1,50 @@
 # Big Data React + FastAPI Project
 
-Bu proje, bir Python FastAPI tabanlı backend servisi ve React tabanlı frontend uygulamasından oluşur. Backend, REST ve WebSocket ile hem tek seferlik "big data" benzeri JSON snapshot verisi sağlayan, hem de anlık (streaming) veri sunan bir API sunar. Frontend ise bu verileri alıp kullanıcıya gösterir.
+Kısa özet: FastAPI backend + React frontend. Gerçek hava durumu verisi (Open‑Meteo), WebSocket canlı akış, ML tabanlı anomali tespiti ve tahmin, Prometheus metrikleri ve modern bir dashboard.
 
 ## Teknoloji Yığını
 
 - Backend
-  - Python 3.8+
-  - FastAPI
-  - Uvicorn (ASGI sunucu)
-  - websockets (WebSocket desteği)
+  - Python 3.11+
+  - FastAPI, Uvicorn, websockets
+  - httpx (Open‑Meteo entegrasyonu)
+  - scikit‑learn (Isolation Forest + Linear Regression)
+  - structlog (loglama)
 - Frontend
   - React (Create React App)
   - JavaScript (ES6+)
+  - Recharts (grafikler)
 
 ## Dosya Yapısı
 
 ```text
 Big data - React - AI/
 ├── backend/
-│   ├── main.py       # FastAPI uygulaması
+│   ├── main.py           # FastAPI uygulaması + ML endpoint'leri + metrics
+│   ├── ml_models.py      # ML (anomali tespiti, tahmin, metrikler)
 │   ├── requirements.txt
 │   └── venv/         # Python sanal ortam
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   └── App.js    # React ana bileşeni
+│   │   ├── App.js        # Dashboard + navigasyon
+│   │   ├── Settings.js   # Ayarlar sayfası
+│   │   ├── MLDashboard.js# ML performans sayfası
+│   │   ├── config.js     # API/WS adresleri
 │   ├── package.json
 │   └── node_modules/
 ├── .gitignore
 └── README.md
 ```
 
-## README İçeriği
+## Özellikler (Kısa)
+
+- Gerçek veri: Open‑Meteo’dan sıcaklık/nem (anahtar gerektirmez)
+- Canlı akış: WebSocket ile her saniye veri
+- ML: Isolation Forest ile anomali, Linear Regression ile tahmin
+- Gözlemlenebilirlik: `/healthz` ve Prometheus uyumlu `/metrics`
+- UI: Modern dashboard, ML dashboard, Ayarlar sayfası
+- Docker: Backend/Frontend Dockerfile ve `docker-compose.yml`
 
 ### Gereksinimler
 
@@ -39,7 +52,7 @@ Big data - React - AI/
 - Node.js ve npm
 - Git (opsiyonel)
 
-### Kurulum ve Çalıştırma
+### Kurulum ve Çalıştırma (Kısa)
 
 1. **Backend**
 
@@ -63,13 +76,29 @@ Big data - React - AI/
    ```
 
    - Uygulama `http://localhost:3000` adresinde çalışır.
-   - Snapshot verisini ve WebSocket stream verilerini `App.js` içinde render eder.
+   - Dashboard, ML Dashboard ve Ayarlar menü üzerinden erişilebilir.
 
-### Önemli Bilgiler
+3. **Docker (opsiyonel)**
 
-- CORS, `http://localhost:3000` adresinden gelen istekler için FastAPI içinde `CORSMiddleware` ile etkinleştirildi.
-- WebSocket desteği için `websockets` paketi yüklendi.
+   ```bash
+   docker compose up --build
+   ```
+
+### Önemli
+
+- CORS, `FRONTEND_ORIGINS` env ile yönetilir (geliştirmede `http://localhost:3000`).
+- WebSocket adresi ve API adresi frontend `.env` veya `src/config.js` üzerinden yapılandırılır.
 - `.gitignore` dosyası, Python ve Node.js derlenmiş dosyalarını, sanal ortamları ve build klasörlerini içerir.
+
+### API Kısa Rehber
+
+- `GET /data` → tek seferlik snapshot (gerçek+simüle veri, ML alanları dahil)
+- `WS /ws` → canlı veri akışı
+- `GET /healthz` → sağlık kontrolü
+- `GET /metrics` → Prometheus metrikleri (ML metrikleri dahil)
+- `POST /ml/train` → modeli eğit
+- `GET /ml/performance` → model performans metrikleri
+- `GET /settings` / `POST /settings` → ayarlar oku/güncelle
 
 ## Kullanım
 
