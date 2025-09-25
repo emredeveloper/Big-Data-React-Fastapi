@@ -25,7 +25,7 @@ function Settings() {
       const data = await response.json();
       setSettings(data);
     } catch (error) {
-      console.error('Ayar yükleme hatası:', error);
+      console.error('Settings loading error:', error);
     }
   };
 
@@ -44,12 +44,12 @@ function Settings() {
       
       const result = await response.json();
       if (result.success) {
-        showSuccess('Ayarlar başarıyla güncellendi!');
+        showSuccess('Settings updated successfully!');
       } else {
-        showError('Ayar güncelleme hatası: ' + result.message);
+        showError('Settings update error: ' + result.message);
       }
     } catch (error) {
-      showError('Ayar güncelleme hatası: ' + error.message);
+      showError('Settings update error: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -66,17 +66,17 @@ function Settings() {
       
       const result = await response.json();
       if (result.success) {
-        showSuccess(`Model başarıyla eğitildi! ${result.samples_used} veri kullanıldı.`);
+        showSuccess(`Model trained successfully! ${result.samples_used} data samples used.`);
         fetchSettings(); // Ayarları yenile
       } else {
         if (result.message) {
           showWarning(result.message);
         } else {
-          showError('Model eğitimi hatası: ' + result.error);
+          showError('Model training error: ' + result.error);
         }
       }
     } catch (error) {
-      showError('Model eğitimi hatası: ' + error.message);
+      showError('Model training error: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -91,18 +91,18 @@ function Settings() {
 
   return (
     <div className="settings-container">
-      <h2 className="settings-title">⚙️ Sistem Ayarları</h2>
+      <h2 className="settings-title">⚙️ System Settings</h2>
       
       {message && (
-        <div className={`message ${message.includes('hatası') ? 'error' : 'success'}`}>
+        <div className={`message ${message.includes('error') ? 'error' : 'success'}`}>
           {message}
         </div>
       )}
 
       <div className="settings-section">
-        <h3>🌍 Hava Durumu Ayarları</h3>
+        <h3>🌍 Weather Settings</h3>
         <div className="form-group">
-          <label>Enlem (Latitude):</label>
+          <label>Latitude:</label>
           <input
             type="number"
             step="0.001"
@@ -113,7 +113,7 @@ function Settings() {
         </div>
         
         <div className="form-group">
-          <label>Boylam (Longitude):</label>
+          <label>Longitude:</label>
           <input
             type="number"
             step="0.001"
@@ -124,7 +124,7 @@ function Settings() {
         </div>
         
         <div className="form-group">
-          <label>Cache Süresi (saniye):</label>
+          <label>Cache Duration (seconds):</label>
           <input
             type="number"
             min="10"
@@ -136,16 +136,16 @@ function Settings() {
       </div>
 
       <div className="settings-section">
-        <h3>🤖 Makine Öğrenmesi</h3>
+        <h3>🤖 Machine Learning</h3>
         <div className="ml-status">
           <div className="status-item">
-            <span className="label">Eğitim Verisi:</span>
-            <span className="value">{settings.ml_training_samples} örnek</span>
+            <span className="label">Training Data:</span>
+            <span className="value">{settings.ml_training_samples} samples</span>
           </div>
           <div className="status-item">
-            <span className="label">Model Durumu:</span>
+            <span className="label">Model Status:</span>
             <span className={`value ${settings.ml_is_trained ? 'trained' : 'not-trained'}`}>
-              {settings.ml_is_trained ? '✅ Eğitilmiş' : '❌ Eğitilmemiş'}
+              {settings.ml_is_trained ? '✅ Trained' : '❌ Not Trained'}
             </span>
           </div>
         </div>
@@ -155,14 +155,14 @@ function Settings() {
           onClick={trainModel}
           disabled={loading || settings.ml_training_samples < 100}
         >
-          {loading ? 'Eğitiliyor...' : 'Modeli Eğit'}
+          {loading ? 'Training...' : 'Train Model'}
         </button>
         
         {settings.ml_training_samples < 100 && (
           <div className="data-requirement-warning">
-            <h4>⚠️ Veri Gereksinimi</h4>
-            <p><strong>Gerekli:</strong> 100 veri noktası</p>
-            <p><strong>Mevcut:</strong> {settings.ml_training_samples} veri noktası</p>
+            <h4>⚠️ Data Requirement</h4>
+            <p><strong>Required:</strong> 100 data points</p>
+            <p><strong>Available:</strong> {settings.ml_training_samples} data points</p>
             <div className="progress-bar">
               <div 
                 className="progress-fill" 
@@ -170,8 +170,8 @@ function Settings() {
               ></div>
             </div>
             <p className="help-text">
-              Daha fazla veri toplamak için dashboard'da bekleyin. 
-              Az veri ile eğitim yapılırsa model performansı çok düşük olur.
+              Wait on the dashboard to collect more data. 
+              Training with insufficient data will result in very low model performance.
             </p>
           </div>
         )}
@@ -183,7 +183,7 @@ function Settings() {
           onClick={updateSettings}
           disabled={loading}
         >
-          {loading ? 'Kaydediliyor...' : 'Ayarları Kaydet'}
+          {loading ? 'Saving...' : 'Save Settings'}
         </button>
         
         <button 
@@ -191,7 +191,7 @@ function Settings() {
           onClick={fetchSettings}
           disabled={loading}
         >
-          Yenile
+          Refresh
         </button>
       </div>
     </div>

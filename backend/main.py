@@ -26,9 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-WEATHER_LAT = float(os.getenv("WEATHER_LAT", "41.015"))  # İstanbul varsayılan
+WEATHER_LAT = float(os.getenv("WEATHER_LAT", "41.015"))  # Istanbul default
 WEATHER_LON = float(os.getenv("WEATHER_LON", "28.979"))
-WEATHER_CACHE_TTL = int(os.getenv("WEATHER_CACHE_TTL", "60"))  # saniye
+WEATHER_CACHE_TTL = int(os.getenv("WEATHER_CACHE_TTL", "60"))  # seconds
 
 _weather_cache = {"ts": 0.0, "temp": None, "rh": None}
 _weather_lock = asyncio.Lock()
@@ -67,12 +67,12 @@ async def get_weather_values() -> tuple[float | None, float | None]:
             return _weather_cache["temp"], _weather_cache["rh"]
 
 async def generate_sensor_data_async():
-    """Gerçek verilerle zenginleştirilmiş sensör verileri üretir."""
+    """Generates sensor data enriched with real data."""
     timestamp = time.time()
-    # Gerçek sıcaklık ve nem
+    # Real temperature and humidity
     real_temp, real_rh = await get_weather_values()
 
-    # Fallback/sinyal gürültüsü ekleme
+    # Fallback/signal noise addition
     if real_temp is None:
         temperature = 25 + 5 * math.sin(timestamp / 10) + random.uniform(-1, 1)
     else:
@@ -83,31 +83,16 @@ async def generate_sensor_data_async():
     else:
         humidity = float(real_rh) + random.uniform(-1.5, 1.5)
 
-    # CPU kullanımı
+    # CPU usage
     cpu_usage = psutil.cpu_percent()
-    # Bellek kullanımı
+    # Memory usage
     memory = psutil.virtual_memory()
     memory_usage = memory.percent
-    # Ağ trafiği (simüle)
+    # Network traffic (simulated)
     network_speed = 50 + 30 * math.sin(timestamp / 5) + random.uniform(-10, 10)
-<<<<<<< HEAD
 
-    # Temel veri
+    # Base data
     base_data = {
-=======
-    
-    # Sinyal gücü (daha dinamik)
-    signal_strength = 75 + 25 * math.sin(timestamp / 7) + random.uniform(-5, 5)
-
-    # Cihaz durumu
-    device_status = random.choices(
-        population=['online', 'offline', 'error'],
-        weights=[0.9, 0.05, 0.05],
-        k=1
-    )[0]
-
-    return {
->>>>>>> 6e124e0b84a829f19afc3c23f92755513a9c263e
         "timestamp": timestamp,
         "temperature": round(temperature, 2),
         "humidity": round(humidity, 2),
@@ -119,7 +104,7 @@ async def generate_sensor_data_async():
         "status": "active" if device_status == 'online' else "warning"
     }
     
-    # ML analizi ekle
+    # Add ML analysis
     ml_analysis = ml_model.add_data_point(base_data)
     base_data.update(ml_analysis)
     
@@ -127,21 +112,21 @@ async def generate_sensor_data_async():
 
 @app.get("/data")
 async def get_data():
-    """Tek seferlik veri snapshot'ı"""
+    """One-time data snapshot"""
     return JSONResponse(content=await generate_sensor_data_async())
 
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
-    """Canlı veri akışı"""
+    """Live data stream"""
     await ws.accept()
     try:
         while True:
             data = await generate_sensor_data_async()
             await ws.send_json(data)
-            await asyncio.sleep(1)  # Her saniye veri gönder
+            await asyncio.sleep(1)  # Send data every second
     except Exception as e:
         logger.warning("websocket_error", error=str(e))
-        # Bağlantı zaten kapalıysa tekrar kapatmaya çalışma
+        # Don't try to close if connection is already closed
         if ws.client_state.name != "DISCONNECTED":
             try:
                 await ws.close()
@@ -150,7 +135,7 @@ async def websocket_endpoint(ws: WebSocket):
 
 @app.get("/stats")
 async def get_stats():
-    """Sistem istatistikleri"""
+    """System statistics"""
     return JSONResponse(content={
         "uptime": time.time(),
         "cpu_count": psutil.cpu_count(),
@@ -189,25 +174,25 @@ async def metrics(request: Request):
 # ML ile ilgili endpoint'ler
 @app.post("/ml/train")
 async def train_ml_model():
-    """ML modelini eğit"""
+    """Train ML model"""
     result = ml_model.train_models()
     return JSONResponse(content=result)
 
 @app.get("/ml/performance")
 async def get_ml_performance():
-    """ML model performans metriklerini getir"""
+    """Get ML model performance metrics"""
     metrics = ml_model.get_performance_metrics()
     return JSONResponse(content=metrics)
 
 @app.get("/ml/anomalies")
 async def get_recent_anomalies(limit: int = 10):
-    """Son anomali tespitlerini getir"""
+    """Get recent anomaly detections"""
     anomalies = ml_model.get_recent_anomalies(limit)
     return JSONResponse(content=anomalies)
 
 @app.get("/settings")
 async def get_settings():
-    """Mevcut ayarları getir"""
+    """Get current settings"""
     return JSONResponse(content={
         "weather_lat": WEATHER_LAT,
         "weather_lon": WEATHER_LON,
@@ -218,7 +203,7 @@ async def get_settings():
 
 @app.post("/settings")
 async def update_settings(settings: dict):
-    """Ayar güncelle"""
+    """Update settings"""
     global WEATHER_LAT, WEATHER_LON, WEATHER_CACHE_TTL
     
     if "weather_lat" in settings:
@@ -228,4 +213,4 @@ async def update_settings(settings: dict):
     if "weather_cache_ttl" in settings:
         WEATHER_CACHE_TTL = int(settings["weather_cache_ttl"])
     
-    return JSONResponse(content={"success": True, "message": "Ayarlar güncellendi"})
+    return JSONResponse(content={"success": True, "message": "Settings updated"})

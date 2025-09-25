@@ -3,6 +3,6 @@ import App from './App';
 
 test('renders dashboard title', () => {
   render(<App />);
-  const titleElement = screen.getByText(/Canlı Veri Dashboard/i);
+  const titleElement = screen.getByText(/Live Data Dashboard/i);
   expect(titleElement).toBeInTheDocument();
 });

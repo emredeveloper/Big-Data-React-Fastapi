@@ -1,71 +1,71 @@
 # Big Data React + FastAPI Project
 
-FastAPI backend + React frontend. Gerçek hava durumu verisi (Open‑Meteo), WebSocket canlı akış, ML tabanlı anomali tespiti ve tahmin, Prometheus metrikleri ve modern bir dashboard.
+FastAPI backend + React frontend. Real weather data (Open‑Meteo), WebSocket live stream, ML-based anomaly detection and prediction, Prometheus metrics and modern dashboard.
 
-## Teknoloji Yığını
+## Tech Stack
 
 - Backend
   - Python 3.11+
   - FastAPI, Uvicorn, websockets
-  - httpx (Open‑Meteo entegrasyonu)
+  - httpx (Open‑Meteo integration)
   - scikit‑learn (Isolation Forest + Linear Regression)
-  - structlog (loglama)
+  - structlog (logging)
 - Frontend
   - React (Create React App)
   - JavaScript (ES6+)
-  - Recharts (grafikler)
+  - Recharts (charts)
 
-## Dosya Yapısı
+## File Structure
 
 ```text
 Big data - React - AI/
 ├── backend/
-│   ├── main.py           # FastAPI uygulaması + ML endpoint'leri + metrics
-│   ├── ml_models.py      # ML (anomali tespiti, tahmin, metrikler)
+│   ├── main.py           # FastAPI application + ML endpoints + metrics
+│   ├── ml_models.py      # ML (anomaly detection, prediction, metrics)
 │   ├── requirements.txt
-│   └── venv/         # Python sanal ortam
+│   └── venv/         # Python virtual environment
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── App.js        # Dashboard + navigasyon
-│   │   ├── Settings.js   # Ayarlar sayfası
-│   │   ├── MLDashboard.js# ML performans sayfası
-│   │   ├── config.js     # API/WS adresleri
+│   │   ├── App.js        # Dashboard + navigation
+│   │   ├── Settings.js   # Settings page
+│   │   ├── MLDashboard.js# ML performance page
+│   │   ├── config.js     # API/WS addresses
 │   ├── package.json
 │   └── node_modules/
 ├── .gitignore
 └── README.md
 ```
 
-## Özellikler
+## Features
 
-- Gerçek veri: Open‑Meteo'dan sıcaklık/nem (anahtar gerektirmez)
-- Canlı akış: WebSocket ile her saniye veri
-- ML: Isolation Forest ile anomali, Random Forest ile tahmin
-- Gözlemlenebilirlik: `/healthz` ve Prometheus uyumlu `/metrics`
-- UI: Modern dashboard, ML dashboard, Ayarlar sayfası
+- Real data: Temperature/humidity from Open‑Meteo (no key required)
+- Live stream: Data every second via WebSocket
+- ML: Anomaly detection with Isolation Forest, prediction with Random Forest
+- Observability: `/healthz` and Prometheus-compatible `/metrics`
+- UI: Modern dashboard, ML dashboard, Settings page
 - Docker: Backend/Frontend Dockerfile ve `docker-compose.yml`
 
-### Gereksinimler
+### Requirements
 
-- Python 3.8 veya üstü
+- Python 3.8 or higher
 - Node.js ve npm
 - Git (opsiyonel)
 
-### Kurulum ve Çalıştırma
+### Installation and Running
 
 1. **Backend**
 
    ```cmd
    cd backend
    python -m venv venv
-   venv\Scripts\activate   # Windows için
+   venv\Scripts\activate   # For Windows
    pip install -r requirements.txt
    uvicorn main:app --reload
    ```
 
-   - Servis `http://127.0.0.1:8000/data` endpoint'inden tek seferlik JSON snapshot verisi döner.
-   - `ws://127.0.0.1:8000/ws` WebSocket endpoint'i, her saniye bir anlık JSON veri yayını yapar.
+   - Service returns one-time JSON snapshot data from `http://127.0.0.1:8000/data` endpoint.
+   - `ws://127.0.0.1:8000/ws` WebSocket endpoint broadcasts real-time JSON data every second.
 
 2. **Frontend**
 
@@ -75,37 +75,37 @@ Big data - React - AI/
    npm start
    ```
 
-   - Uygulama `http://localhost:3000` adresinde çalışır.
-   - Dashboard, ML Dashboard ve Ayarlar menü üzerinden erişilebilir.
+   - Application runs at `http://localhost:3000`.
+   - Dashboard, ML Dashboard and Settings are accessible via menu.
 
-3. **Docker (opsiyonel)**
+3. **Docker (optional)**
 
    ```bash
    docker compose up --build
    ```
 
-### Önemli
+### Important
 
-- CORS, `FRONTEND_ORIGINS` env ile yönetilir (geliştirmede `http://localhost:3000`).
-- WebSocket adresi ve API adresi frontend `.env` veya `src/config.js` üzerinden yapılandırılır.
-- `.gitignore` dosyası, Python ve Node.js derlenmiş dosyalarını, sanal ortamları ve build klasörlerini içerir.
+- CORS is managed via `FRONTEND_ORIGINS` env (development: `http://localhost:3000`).
+- WebSocket address and API address are configured via frontend `.env` or `src/config.js`.
+- `.gitignore` file includes Python and Node.js compiled files, virtual environments and build folders.
 
-### API Rehber
+### API Guide
 
-- `GET /data` → tek seferlik snapshot (gerçek+simüle veri, ML alanları dahil)
-- `WS /ws` → canlı veri akışı
-- `GET /healthz` → sağlık kontrolü
-- `GET /metrics` → Prometheus metrikleri (ML metrikleri dahil)
-- `POST /ml/train` → modeli eğit
-- `GET /ml/performance` → model performans metrikleri
-- `GET /settings` / `POST /settings` → ayarlar oku/güncelle
+- `GET /data` → one-time snapshot (real+simulated data, including ML fields)
+- `WS /ws` → live data stream
+- `GET /healthz` → health check
+- `GET /metrics` → Prometheus metrics (including ML metrics)
+- `POST /ml/train` → train model
+- `GET /ml/performance` → model performance metrics
+- `GET /settings` / `POST /settings` → read/update settings
 
-## Kullanım
+## Usage
 
-1. Önce backend sunucusunu çalıştırın.
-2. Ardından frontend uygulamasını başlatın.
-3. Tarayıcıda `http://localhost:3000` adresini açın. "Snapshot" verisini ve anlık stream listesini göreceksiniz.
+1. First, run the backend server.
+2. Then, start the frontend application.
+3. Open `http://localhost:3000` in your browser. You will see "Snapshot" data and real-time stream list.
 
 ---
 
-> Projenin geliştirilmesi, büyük veri (Big Data) ya da gerçek zamanlı veri işleme (stream processing) altyapılarına kolayca entegre edilebilir. Örneğin; Kafka, Kinesis, Redis Streams vb. ile genişletilebilir.
+> The project development can be easily integrated with Big Data or real-time data processing (stream processing) infrastructures. For example; it can be extended with Kafka, Kinesis, Redis Streams etc.

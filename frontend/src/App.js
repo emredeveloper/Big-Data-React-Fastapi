@@ -13,27 +13,22 @@ import './App.css';
 // Cihaz durumu için ikon ve metin döndüren yardımcı fonksiyon
 const getDeviceStatusUI = (status) => {
   switch (status) {
-    case 'online': return { icon: '✅', text: 'Çevrimiçi' };
-    case 'offline': return { icon: '❌', text: 'Çevrimdışı' };
-    case 'error': return { icon: '⚠️', text: 'Hata' };
-    default: return { icon: '❔', text: 'Bilinmiyor' };
+    case 'online': return { icon: '✅', text: 'Online' };
+    case 'offline': return { icon: '❌', text: 'Offline' };
+    case 'error': return { icon: '⚠️', text: 'Error' };
+    default: return { icon: '❔', text: 'Unknown' };
   }
 };
 
 function App() {
   const [streamData, setStreamData] = useState([]);
   const [currentData, setCurrentData] = useState(null);
-<<<<<<< HEAD
   const [connState, setConnState] = useState('connecting'); // connecting | open | closed
   const [currentPage, setCurrentPage] = useState('dashboard'); // dashboard | settings | ml
-=======
-  const [timeRange, setTimeRange] = useState(60); // Saniye cinsinden
->>>>>>> 6e124e0b84a829f19afc3c23f92755513a9c263e
   const wsRef = useRef();
   const { toasts, addToast, removeToast, showInfo, showWarning } = useToast();
 
   useEffect(() => {
-<<<<<<< HEAD
     // Open WebSocket for real-time stream with auto-reconnect
     let retry = 0;
 
@@ -43,13 +38,9 @@ function App() {
       wsRef.current.onopen = () => {
         retry = 0;
         setConnState('open');
-        showInfo('WebSocket bağlantısı kuruldu');
+        showInfo('WebSocket connection established');
       };
       wsRef.current.onmessage = e => {
-=======
-    wsRef.current = new WebSocket('ws://localhost:8000/ws');
-    wsRef.current.onmessage = e => {
->>>>>>> 6e124e0b84a829f19afc3c23f92755513a9c263e
       const data = JSON.parse(e.data);
       const formattedData = {
         ...data,
@@ -58,26 +49,21 @@ function App() {
       };
       
       setCurrentData(formattedData);
-<<<<<<< HEAD
       setStreamData(prev => [formattedData, ...prev].slice(0, 50));
       
       // Anomali tespit edildiğinde uyarı göster
       if (formattedData.is_anomaly) {
-        showWarning(`Anomali tespit edildi! Skor: ${formattedData.anomaly_score?.toFixed(3)}`);
+        showWarning(`Anomaly detected! Score: ${formattedData.anomaly_score?.toFixed(3)}`);
       }
       };
       wsRef.current.onerror = console.error;
       wsRef.current.onclose = () => {
         setConnState('closed');
-        showWarning('WebSocket bağlantısı kesildi, yeniden bağlanıyor...');
+        showWarning('WebSocket connection lost, reconnecting...');
         const timeout = Math.min(30000, 1000 * Math.pow(2, retry));
         retry += 1;
         setTimeout(() => connect(), timeout);
       };
-=======
-      // Gelen veriyi zaman damgasıyla birlikte sakla
-      setStreamData(prev => [{...formattedData, timestamp: data.timestamp}, ...prev]);
->>>>>>> 6e124e0b84a829f19afc3c23f92755513a9c263e
     };
     connect();
 
@@ -89,20 +75,19 @@ function App() {
     };
   }, []);
 
-  // Zaman filtresine göre veriyi hazırla
+  // Prepare data according to time filter
   const filteredData = streamData
     .filter(d => (Date.now() / 1000) - d.timestamp < timeRange)
-    .slice(0, 100) // Maksimum 100 veri noktası göster
+    .slice(0, 100) // Show maximum 100 data points
     .reverse();
 
   // Pie chart için CPU ve Memory verileri
   const systemUsageData = currentData ? [
     { name: 'CPU', value: currentData.cpu_usage },
-    { name: 'Bellek', value: currentData.memory_usage },
+    { name: 'Memory', value: currentData.memory_usage },
   ] : [];
   const COLORS = ['#8884d8', '#82ca9d'];
 
-<<<<<<< HEAD
   const renderPage = () => {
     switch (currentPage) {
       case 'settings':
@@ -120,63 +105,50 @@ function App() {
         <span className={`connection-badge ${
           connState === 'open' ? 'conn-open' : connState === 'connecting' ? 'conn-connecting' : 'conn-closed'
         }`}>
-          {connState === 'open' ? 'Bağlı' : connState === 'connecting' ? 'Bağlanıyor' : 'Kopuk'}
+          {connState === 'open' ? 'Connected' : connState === 'connecting' ? 'Connecting' : 'Disconnected'}
         </span>
       </h1>
-=======
-  return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1 className="dashboard-title">🔥 Canlı Veri Dashboard</h1>
-        <div className="time-filter-buttons">
-          <span>Zaman Aralığı: </span>
-          <button onClick={() => setTimeRange(60)} className={timeRange === 60 ? 'active' : ''}>1dk</button>
-          <button onClick={() => setTimeRange(300)} className={timeRange === 300 ? 'active' : ''}>5dk</button>
-          <button onClick={() => setTimeRange(900)} className={timeRange === 900 ? 'active' : ''}>15dk</button>
-        </div>
-      </header>
->>>>>>> 6e124e0b84a829f19afc3c23f92755513a9c263e
       
       {currentData && (
         <div className="value-cards-grid">
           <div className="value-card temperature-card">
-            <h3>🌡️ Sıcaklık</h3>
+            <h3>🌡️ Temperature</h3>
             <p>{currentData.temperature}°C</p>
           </div>
           <div className="value-card humidity-card">
-            <h3>💧 Nem</h3>
+            <h3>💧 Humidity</h3>
             <p>{currentData.humidity}%</p>
           </div>
           <div className="value-card network-card">
-            <h3>🚀 Ağ Hızı</h3>
+            <h3>🚀 Network Speed</h3>
             <p>{currentData.network_speed} Mbps</p>
           </div>
           <div className="value-card signal-card">
-            <h3>📶 Sinyal Gücü</h3>
+            <h3>📶 Signal Strength</h3>
             <p>{currentData.signal_strength}%</p>
           </div>
           <div className={`value-card status-card-${currentData.device_status}`}>
-            <h3>{getDeviceStatusUI(currentData.device_status).icon} Cihaz Durumu</h3>
+            <h3>{getDeviceStatusUI(currentData.device_status).icon} Device Status</h3>
             <p className="status-text">{getDeviceStatusUI(currentData.device_status).text}</p>
           </div>
           
           {currentData.is_anomaly && (
             <div className="value-card anomaly-card">
-              <h3>🚨 Anomali Tespit Edildi!</h3>
+              <h3>🚨 Anomaly Detected!</h3>
               <p className="anomaly-score">
-                Skor: {currentData.anomaly_score?.toFixed(3) || 'N/A'}
+                Score: {currentData.anomaly_score?.toFixed(3) || 'N/A'}
               </p>
             </div>
           )}
           
           {currentData.temperature_prediction && (
             <div className="value-card prediction-card">
-              <h3>🔮 Sıcaklık Tahmini</h3>
+              <h3>🔮 Temperature Prediction</h3>
               <p className="prediction-value">
                 {currentData.temperature_prediction.toFixed(1)}°C
               </p>
               <p className="prediction-confidence">
-                Güven: %{(currentData.prediction_confidence * 100).toFixed(0)}
+                Confidence: %{(currentData.prediction_confidence * 100).toFixed(0)}
               </p>
             </div>
           )}
@@ -185,7 +157,7 @@ function App() {
 
       <div className="charts-grid">
         <div className="chart-container">
-          <h3 className="chart-title">📈 Sıcaklık & Nem Trendi</h3>
+          <h3 className="chart-title">📈 Temperature & Humidity Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -193,14 +165,14 @@ function App() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="temperature" name="Sıcaklık" stroke="#ff6b6b" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="humidity" name="Nem" stroke="#4ecdc4" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="temperature" name="Temperature" stroke="#ff6b6b" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="humidity" name="Humidity" stroke="#4ecdc4" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         <div className="chart-container">
-          <h3 className="chart-title">📶 Sinyal Gücü</h3>
+          <h3 className="chart-title">📶 Signal Strength</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={filteredData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -208,13 +180,13 @@ function App() {
               <YAxis domain={[0, 100]} />
               <Tooltip />
               <Legend />
-              <Area type="monotone" dataKey="signal_strength" name="Sinyal" stroke="#feca57" fill="#feca57" fillOpacity={0.6}/>
+              <Area type="monotone" dataKey="signal_strength" name="Signal" stroke="#feca57" fill="#feca57" fillOpacity={0.6}/>
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         <div className="chart-container">
-          <h3 className="chart-title">💻 Anlık Sistem Kullanımı</h3>
+          <h3 className="chart-title">💻 Real-time System Usage</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={currentData ? [currentData] : []}>
               <XAxis dataKey="time" hide />
@@ -222,13 +194,13 @@ function App() {
               <Tooltip />
               <Legend />
               <Bar dataKey="cpu_usage" fill="#8884d8" name="CPU %" />
-              <Bar dataKey="memory_usage" fill="#82ca9d" name="Bellek %" />
+              <Bar dataKey="memory_usage" fill="#82ca9d" name="Memory %" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="chart-container">
-          <h3 className="chart-title">🔄 Sistem Kaynakları</h3>
+          <h3 className="chart-title">🔄 System Resources</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={systemUsageData} cx="50%" cy="50%" labelLine={false}
@@ -246,19 +218,19 @@ function App() {
       </div>
 
       <div className="data-table-container">
-        <h3 className="table-title">📊 Son Veriler</h3>
+        <h3 className="table-title">📊 Recent Data</h3>
         <div className="table-wrapper">
           <table className="data-table">
             <thead>
               <tr className="table-header">
-                <th>Zaman</th>
-                <th>Sıcaklık</th>
-                <th>Nem</th>
-                <th>Sinyal</th>
+                <th>Time</th>
+                <th>Temperature</th>
+                <th>Humidity</th>
+                <th>Signal</th>
                 <th>CPU</th>
-                <th>Bellek</th>
-                <th>Ağ Hızı</th>
-                <th>Cihaz Durumu</th>
+                <th>Memory</th>
+                <th>Network Speed</th>
+                <th>Device Status</th>
               </tr>
             </thead>
             <tbody>
@@ -307,7 +279,7 @@ function App() {
             className={`nav-link ${currentPage === 'settings' ? 'active' : ''}`}
             onClick={() => setCurrentPage('settings')}
           >
-            ⚙️ Ayarlar
+            ⚙️ Settings
           </button>
         </div>
       </nav>

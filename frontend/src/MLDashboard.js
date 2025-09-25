@@ -25,7 +25,7 @@ function MLDashboard() {
       setPerformance(data);
       setError('');
     } catch (err) {
-      setError('Performans verisi yüklenemedi: ' + err.message);
+      setError('Failed to load performance data: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ function MLDashboard() {
   if (loading) {
     return (
       <div className="ml-dashboard-container">
-        <div className="loading">ML performans verileri yükleniyor...</div>
+        <div className="loading">Loading ML performance data...</div>
       </div>
     );
   }
@@ -50,51 +50,51 @@ function MLDashboard() {
   if (!performance) {
     return (
       <div className="ml-dashboard-container">
-        <div className="no-data">Performans verisi bulunamadı</div>
+        <div className="no-data">No performance data found</div>
       </div>
     );
   }
 
-  // Performans metrikleri için grafik verisi
+  // Chart data for performance metrics
   const performanceData = [
     {
-      name: 'Anomali Tespiti',
+      name: 'Anomaly Detection',
       accuracy: Math.round(performance.anomaly_detection_accuracy * 100),
       color: '#ff6b6b'
     },
     {
-      name: 'Sıcaklık Tahmini',
+      name: 'Temperature Prediction',
       accuracy: Math.round(performance.temperature_prediction_r2 * 100),
       color: '#4ecdc4'
     },
     {
-      name: 'Nem Tahmini',
+      name: 'Humidity Prediction',
       accuracy: Math.round(performance.humidity_prediction_r2 * 100),
       color: '#45b7d1'
     }
   ];
 
   const predictionData = [
-    { name: 'Toplam Tahmin', value: performance.total_predictions, color: '#8884d8' },
-    { name: 'Tespit Edilen Anomali', value: performance.total_anomalies_detected, color: '#ff9999' }
+    { name: 'Total Predictions', value: performance.total_predictions, color: '#8884d8' },
+    { name: 'Detected Anomalies', value: performance.total_anomalies_detected, color: '#ff9999' }
   ];
 
   return (
     <div className="ml-dashboard-container">
-      <h2 className="ml-dashboard-title">🤖 Makine Öğrenmesi Dashboard</h2>
+      <h2 className="ml-dashboard-title">🤖 Machine Learning Dashboard</h2>
       
-      {/* Performans Kartları */}
+      {/* Performance Cards */}
       <div className="performance-cards">
         <div className="perf-card">
-          <h3>📊 Anomali Tespiti</h3>
+          <h3>📊 Anomaly Detection</h3>
           <div className="perf-value">
             {Math.round(performance.anomaly_detection_accuracy * 100)}%
           </div>
-          <div className="perf-label">Doğruluk</div>
+          <div className="perf-label">Accuracy</div>
         </div>
         
         <div className="perf-card">
-          <h3>🌡️ Sıcaklık Tahmini</h3>
+          <h3>🌡️ Temperature Prediction</h3>
           <div className="perf-value">
             {Math.round(performance.temperature_prediction_r2 * 100)}%
           </div>
@@ -102,7 +102,7 @@ function MLDashboard() {
         </div>
         
         <div className="perf-card">
-          <h3>💧 Nem Tahmini</h3>
+          <h3>💧 Humidity Prediction</h3>
           <div className="perf-value">
             {Math.round(performance.humidity_prediction_r2 * 100)}%
           </div>
@@ -110,38 +110,38 @@ function MLDashboard() {
         </div>
         
         <div className="perf-card">
-          <h3>📈 Toplam Tahmin</h3>
+          <h3>📈 Total Predictions</h3>
           <div className="perf-value">
             {performance.total_predictions}
           </div>
-          <div className="perf-label">Adet</div>
+          <div className="perf-label">Count</div>
         </div>
         
         <div className="perf-card">
-          <h3>⚠️ Anomali</h3>
+          <h3>⚠️ Anomaly</h3>
           <div className="perf-value">
             {performance.total_anomalies_detected}
           </div>
-          <div className="perf-label">Tespit Edilen</div>
+          <div className="perf-label">Detected</div>
         </div>
         
         <div className="perf-card">
-          <h3>🕒 Son Eğitim</h3>
+          <h3>🕒 Last Training</h3>
           <div className="perf-value">
             {performance.last_training_time ? 
               new Date(performance.last_training_time * 1000).toLocaleTimeString() : 
-              'Henüz yok'
+              'Not yet'
             }
           </div>
-          <div className="perf-label">Zaman</div>
+          <div className="perf-label">Time</div>
         </div>
       </div>
 
-      {/* Grafikler */}
+      {/* Charts */}
       <div className="ml-charts-grid">
         {/* Model Performansı Bar Chart */}
         <div className="chart-container">
-          <h3 className="chart-title">📊 Model Performansı</h3>
+          <h3 className="chart-title">📊 Model Performance</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={performanceData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -156,7 +156,7 @@ function MLDashboard() {
 
         {/* Tahmin Dağılımı Pie Chart */}
         <div className="chart-container">
-          <h3 className="chart-title">📈 Tahmin Dağılımı</h3>
+          <h3 className="chart-title">📈 Prediction Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -179,18 +179,18 @@ function MLDashboard() {
         </div>
       </div>
 
-      {/* Model Durumu */}
+      {/* Model Status */}
       <div className="model-status">
-        <h3>🔧 Model Durumu</h3>
+        <h3>🔧 Model Status</h3>
         <div className="status-grid">
           <div className="status-item">
-            <span className="status-label">Eğitim Durumu:</span>
+            <span className="status-label">Training Status:</span>
             <span className={`status-value ${performance.last_training_time ? 'active' : 'inactive'}`}>
-              {performance.last_training_time ? '✅ Aktif' : '❌ Pasif'}
+              {performance.last_training_time ? '✅ Active' : '❌ Inactive'}
             </span>
           </div>
           <div className="status-item">
-            <span className="status-label">Son Güncelleme:</span>
+            <span className="status-label">Last Update:</span>
             <span className="status-value">
               {new Date().toLocaleTimeString()}
             </span>
@@ -198,13 +198,13 @@ function MLDashboard() {
         </div>
       </div>
 
-      {/* Yenile Butonu */}
+      {/* Refresh Button */}
       <div className="refresh-section">
         <button 
           className="refresh-button"
           onClick={fetchPerformance}
         >
-          🔄 Verileri Yenile
+          🔄 Refresh Data
         </button>
       </div>
     </div>
