@@ -1,6 +1,6 @@
 # Big Data React + FastAPI Project
 
-Kısa özet: FastAPI backend + React frontend. Gerçek hava durumu verisi (Open‑Meteo), WebSocket canlı akış, ML tabanlı anomali tespiti ve tahmin, Prometheus metrikleri ve modern bir dashboard.
+FastAPI backend + React frontend. Gerçek hava durumu verisi (Open‑Meteo), WebSocket canlı akış, ML tabanlı anomali tespiti ve tahmin, Prometheus metrikleri ve modern bir dashboard.
 
 ## Teknoloji Yığını
 
@@ -37,11 +37,11 @@ Big data - React - AI/
 └── README.md
 ```
 
-## Özellikler (Kısa)
+## Özellikler
 
-- Gerçek veri: Open‑Meteo’dan sıcaklık/nem (anahtar gerektirmez)
+- Gerçek veri: Open‑Meteo'dan sıcaklık/nem (anahtar gerektirmez)
 - Canlı akış: WebSocket ile her saniye veri
-- ML: Isolation Forest ile anomali, Linear Regression ile tahmin
+- ML: Isolation Forest ile anomali, Random Forest ile tahmin
 - Gözlemlenebilirlik: `/healthz` ve Prometheus uyumlu `/metrics`
 - UI: Modern dashboard, ML dashboard, Ayarlar sayfası
 - Docker: Backend/Frontend Dockerfile ve `docker-compose.yml`
@@ -52,7 +52,7 @@ Big data - React - AI/
 - Node.js ve npm
 - Git (opsiyonel)
 
-### Kurulum ve Çalıştırma (Kısa)
+### Kurulum ve Çalıştırma
 
 1. **Backend**
 
@@ -90,7 +90,7 @@ Big data - React - AI/
 - WebSocket adresi ve API adresi frontend `.env` veya `src/config.js` üzerinden yapılandırılır.
 - `.gitignore` dosyası, Python ve Node.js derlenmiş dosyalarını, sanal ortamları ve build klasörlerini içerir.
 
-### API Kısa Rehber
+### API Rehber
 
 - `GET /data` → tek seferlik snapshot (gerçek+simüle veri, ML alanları dahil)
 - `WS /ws` → canlı veri akışı
