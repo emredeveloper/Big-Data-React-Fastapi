@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest, RandomForestRegressor
+from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
@@ -64,17 +65,21 @@ class SensorDataML:
         
         # Make predictions if model is trained
         if self.is_trained and len(self.training_data) >= 10:
-            # Anomaly detection
-            anomaly_score = self.anomaly_detector.decision_function([features])[0]
-            is_anomaly = self.anomaly_detector.predict([features])[0] == -1
-            
-            result.update({
-                "is_anomaly": bool(is_anomaly),
-                "anomaly_score": float(anomaly_score)
-            })
-            
-            if is_anomaly:
-                self.performance_metrics["total_anomalies_detected"] += 1
+            try:
+                scaled_features = self.scaler.transform([features])
+                # Anomaly detection
+                anomaly_score = self.anomaly_detector.decision_function(scaled_features)[0]
+                is_anomaly = self.anomaly_detector.predict(scaled_features)[0] == -1
+
+                result.update({
+                    "is_anomaly": bool(is_anomaly),
+                    "anomaly_score": float(anomaly_score)
+                })
+
+                if is_anomaly:
+                    self.performance_metrics["total_anomalies_detected"] += 1
+            except NotFittedError:
+                pass
             
             # Temperature prediction
             if len(self.training_data) >= 5:
@@ -129,9 +134,11 @@ class SensorDataML:
         try:
             # Prepare data
             X = np.array(self.training_data)
-            
+
             # Anomaly detection training
-            self.anomaly_detector.fit(X)
+            self.scaler.fit(X)
+            X_scaled = self.scaler.transform(X)
+            self.anomaly_detector.fit(X_scaled)
             
             # Sliding window approach for prediction models
             if len(self.training_data) >= 20:  # More data required
@@ -239,10 +246,15 @@ class SensorDataML:
             return
         
         X = np.array(self.training_data)
-        
+
+        try:
+            X_scaled = self.scaler.transform(X)
+        except NotFittedError:
+            return
+
         # Anomaly detection performance (simple heuristic)
-        anomaly_scores = self.anomaly_detector.decision_function(X)
-        anomaly_rate = np.mean(self.anomaly_detector.predict(X) == -1)
+        anomaly_scores = self.anomaly_detector.decision_function(X_scaled)
+        anomaly_rate = np.mean(self.anomaly_detector.predict(X_scaled) == -1)
         self.performance_metrics["anomaly_detection_accuracy"] = 1.0 - abs(anomaly_rate - 0.1)
         
         # Prediction performance - use test data if available
