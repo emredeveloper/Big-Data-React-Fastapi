@@ -90,6 +90,27 @@ async def generate_sensor_data_async():
     memory_usage = memory.percent
     # Network traffic (simulated)
     network_speed = 50 + 30 * math.sin(timestamp / 5) + random.uniform(-10, 10)
+    network_speed = max(0, network_speed)
+
+    # Signal strength correlated with network performance
+    normalized_speed = min(1.0, max(0.0, network_speed / 100))
+    signal_base = 60 + 20 * math.sin(timestamp / 12) + random.uniform(-8, 8)
+    signal_strength = signal_base + (normalized_speed - 0.5) * 30
+    signal_strength = max(0, min(100, signal_strength))
+
+    if signal_strength >= 70:
+        device_status = "online"
+    elif signal_strength >= 40:
+        device_status = "warning"
+    else:
+        device_status = "offline"
+
+    if device_status == "online":
+        status = "active"
+    elif device_status == "warning":
+        status = "warning"
+    else:
+        status = "offline"
 
     # Base data
     base_data = {
@@ -98,10 +119,10 @@ async def generate_sensor_data_async():
         "humidity": round(humidity, 2),
         "cpu_usage": round(cpu_usage, 2),
         "memory_usage": round(memory_usage, 2),
-        "network_speed": round(max(0, network_speed), 2),
-        "signal_strength": round(max(0, min(100, signal_strength)), 2),
+        "network_speed": round(network_speed, 2),
+        "signal_strength": round(signal_strength, 2),
         "device_status": device_status,
-        "status": "active" if device_status == 'online' else "warning"
+        "status": status
     }
     
     # Add ML analysis
