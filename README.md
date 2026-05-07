@@ -1,111 +1,124 @@
 # Big Data React + FastAPI Project
 
-FastAPI backend + React frontend. Real weather data (Open‑Meteo), WebSocket live stream, ML-based anomaly detection and prediction, Prometheus metrics and modern dashboard.
+FastAPI backend + React frontend for real-time weather/sensor data, WebSocket streaming, ML-based anomaly detection, prediction, Prometheus-style metrics, and a modern dashboard.
 
 ## Tech Stack
 
-- Backend
-  - Python 3.11+
-  - FastAPI, Uvicorn, websockets
-  - httpx (Open‑Meteo integration)
-  - scikit‑learn (Isolation Forest + Linear Regression)
-  - structlog (logging)
-- Frontend
-  - React (Create React App)
-  - JavaScript (ES6+)
-  - Recharts (charts)
+### Backend
+- Python 3.11+
+- FastAPI, Uvicorn, WebSockets
+- httpx for Open-Meteo integration
+- scikit-learn for anomaly detection and prediction
+- structlog for structured logging
+- Prometheus-compatible metrics endpoint
 
-## File Structure
+### Frontend
+- React
+- JavaScript
+- Recharts
+- REST + WebSocket integration
+
+## Features
+
+- Real weather data from Open-Meteo, no API key required
+- Live data stream over WebSocket
+- ML anomaly detection and prediction
+- Health check endpoint
+- Prometheus-compatible metrics endpoint
+- Dashboard, ML dashboard, and settings page
+- Docker and Docker Compose support
+
+## Project Structure
 
 ```text
-Big data - React - AI/
+Big-Data-React-Fastapi/
 ├── backend/
-│   ├── main.py           # FastAPI application + ML endpoints + metrics
-│   ├── ml_models.py      # ML (anomaly detection, prediction, metrics)
+│   ├── main.py           # FastAPI application, WebSocket, metrics, settings
+│   ├── ml_models.py      # ML anomaly detection, prediction, metrics
 │   ├── requirements.txt
-│   └── venv/         # Python virtual environment
+│   └── Dockerfile
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── App.js        # Dashboard + navigation
-│   │   ├── Settings.js   # Settings page
-│   │   ├── MLDashboard.js# ML performance page
-│   │   ├── config.js     # API/WS addresses
+│   │   ├── App.js
+│   │   ├── Settings.js
+│   │   ├── MLDashboard.js
+│   │   └── config.js
 │   ├── package.json
-│   └── node_modules/
+│   └── Dockerfile
+├── docker-compose.yml
 ├── .gitignore
 └── README.md
 ```
 
-## Features
+## Requirements
 
-- Real data: Temperature/humidity from Open‑Meteo (no key required)
-- Live stream: Data every second via WebSocket
-- ML: Anomaly detection with Isolation Forest, prediction with Random Forest
-- Observability: `/healthz` and Prometheus-compatible `/metrics`
-- UI: Modern dashboard, ML dashboard, Settings page
-- Docker: Backend/Frontend Dockerfile ve `docker-compose.yml`
+- Python 3.11+
+- Node.js and npm
+- Docker and Docker Compose, optional
 
-### Requirements
+## Installation and Running
 
-- Python 3.8 or higher
-- Node.js ve npm
-- Git (opsiyonel)
+### Backend
 
-### Installation and Running
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
-1. **Backend**
+Backend endpoints:
 
-   ```cmd
-   cd backend
-   python -m venv venv
-   venv\Scripts\activate   # For Windows
-   pip install -r requirements.txt
-   uvicorn main:app --reload
-   ```
+- `GET /data` returns one-time JSON snapshot data
+- `WS /ws` streams live JSON data every second
+- `GET /healthz` returns health status
+- `GET /metrics` returns Prometheus-compatible metrics
 
-   - Service returns one-time JSON snapshot data from `http://127.0.0.1:8000/data` endpoint.
-   - `ws://127.0.0.1:8000/ws` WebSocket endpoint broadcasts real-time JSON data every second.
+### Frontend
 
-2. **Frontend**
+```bash
+cd frontend
+npm install
+npm start
+```
 
-   ```cmd
-   cd frontend
-   npm install
-   npm start
-   ```
+The frontend runs at `http://localhost:3000`.
 
-   - Application runs at `http://localhost:3000`.
-   - Dashboard, ML Dashboard and Settings are accessible via menu.
+### Docker
 
-3. **Docker (optional)**
+```bash
+docker compose up --build
+```
 
-   ```bash
-   docker compose up --build
-   ```
+## Configuration
 
-### Important
+Backend environment variables:
 
-- CORS is managed via `FRONTEND_ORIGINS` env (development: `http://localhost:3000`).
-- WebSocket address and API address are configured via frontend `.env` or `src/config.js`.
-- `.gitignore` file includes Python and Node.js compiled files, virtual environments and build folders.
+```env
+FRONTEND_ORIGINS=http://localhost:3000
+WEATHER_LAT=41.015
+WEATHER_LON=28.979
+WEATHER_CACHE_TTL=60
+```
 
-### API Guide
+Frontend API and WebSocket addresses can be configured with frontend environment variables or `src/config.js`.
 
-- `GET /data` → one-time snapshot (real+simulated data, including ML fields)
+## API Guide
+
+- `GET /data` → one-time snapshot with real + simulated data and ML fields
 - `WS /ws` → live data stream
 - `GET /healthz` → health check
-- `GET /metrics` → Prometheus metrics (including ML metrics)
-- `POST /ml/train` → train model
+- `GET /metrics` → Prometheus-compatible metrics
+- `POST /ml/train` → train ML model
 - `GET /ml/performance` → model performance metrics
-- `GET /settings` / `POST /settings` → read/update settings
+- `GET /ml/anomalies` → recent anomalies
+- `GET /settings` / `POST /settings` → read/update runtime settings
 
-## Usage
+## Roadmap Ideas
 
-1. First, run the backend server.
-2. Then, start the frontend application.
-3. Open `http://localhost:3000` in your browser. You will see "Snapshot" data and real-time stream list.
-
----
-
-> The project development can be easily integrated with Big Data or real-time data processing (stream processing) infrastructures. For example; it can be extended with Kafka, Kinesis, Redis Streams etc.
+- Add tests for API endpoints
+- Add `.env.example` files for backend and frontend
+- Add Kafka, Redis Streams, or Kinesis integration for stream processing
+- Add authentication for settings and admin operations
