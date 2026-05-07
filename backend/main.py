@@ -1,22 +1,26 @@
 from fastapi import FastAPI, WebSocket, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
-import asyncio, random, time, math
-import os
-import structlog
-import psutil  # Sistem metrikleri için
-import httpx
+from fastapi.middleware.cors import CORSMiddleware
+
+import asyncio
 import math
+import os
+import random
+import time
+
+import httpx
+import psutil
+import structlog
+
 from ml_models import SensorDataML
 
 logger = structlog.get_logger()
 app = FastAPI()
 
-# ML modeli başlat
+# Initialize ML model
 ml_model = SensorDataML()
 
 # Allow CORS from React dev server
-from fastapi.middleware.cors import CORSMiddleware
-
 origins_env = os.getenv("FRONTEND_ORIGINS", "http://localhost:3000")
 origins = [o.strip() for o in origins_env.split(",") if o.strip()]
 app.add_middleware(
@@ -54,7 +58,7 @@ async def get_weather_values() -> tuple[float | None, float | None]:
     if now - _weather_cache["ts"] < WEATHER_CACHE_TTL and _weather_cache["temp"] is not None:
         return _weather_cache["temp"], _weather_cache["rh"]
     async with _weather_lock:
-        # Tekrar kontrol et (double-checked)
+        # Double-check after acquiring the lock.
         if now - _weather_cache["ts"] < WEATHER_CACHE_TTL and _weather_cache["temp"] is not None:
             return _weather_cache["temp"], _weather_cache["rh"]
         try:
@@ -63,16 +67,13 @@ async def get_weather_values() -> tuple[float | None, float | None]:
             return temp, rh
         except Exception as e:
             logger.warning("weather_fetch_failed", error=str(e))
-            # Cache bozma ama en azından None döndür
             return _weather_cache["temp"], _weather_cache["rh"]
 
 async def generate_sensor_data_async():
-    """Generates sensor data enriched with real data."""
+    """Generate sensor data enriched with real weather data."""
     timestamp = time.time()
-    # Real temperature and humidity
     real_temp, real_rh = await get_weather_values()
 
-    # Fallback/signal noise addition
     if real_temp is None:
         temperature = 25 + 5 * math.sin(timestamp / 10) + random.uniform(-1, 1)
     else:
@@ -83,16 +84,12 @@ async def generate_sensor_data_async():
     else:
         humidity = float(real_rh) + random.uniform(-1.5, 1.5)
 
-    # CPU usage
     cpu_usage = psutil.cpu_percent()
-    # Memory usage
-    memory = psutil.virtual_memory()
-    memory_usage = memory.percent
-    # Network traffic (simulated)
+    memory_usage = psutil.virtual_memory().percent
+
     network_speed = 50 + 30 * math.sin(timestamp / 5) + random.uniform(-10, 10)
     network_speed = max(0, network_speed)
 
-    # Signal strength correlated with network performance
     normalized_speed = min(1.0, max(0.0, network_speed / 100))
     signal_base = 60 + 20 * math.sin(timestamp / 12) + random.uniform(-8, 8)
     signal_strength = signal_base + (normalized_speed - 0.5) * 30
@@ -112,7 +109,6 @@ async def generate_sensor_data_async():
     else:
         status = "offline"
 
-    # Base data
     base_data = {
         "timestamp": timestamp,
         "temperature": round(temperature, 2),
@@ -122,46 +118,44 @@ async def generate_sensor_data_async():
         "network_speed": round(network_speed, 2),
         "signal_strength": round(signal_strength, 2),
         "device_status": device_status,
-        "status": status
+        "status": status,
     }
-    
-    # Add ML analysis
+
     ml_analysis = ml_model.add_data_point(base_data)
     base_data.update(ml_analysis)
-    
+
     return base_data
 
 @app.get("/data")
 async def get_data():
-    """One-time data snapshot"""
+    """Return a one-time data snapshot."""
     return JSONResponse(content=await generate_sensor_data_async())
 
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
-    """Live data stream"""
+    """Stream live data over WebSocket."""
     await ws.accept()
     try:
         while True:
             data = await generate_sensor_data_async()
             await ws.send_json(data)
-            await asyncio.sleep(1)  # Send data every second
+            await asyncio.sleep(1)
     except Exception as e:
         logger.warning("websocket_error", error=str(e))
-        # Don't try to close if connection is already closed
         if ws.client_state.name != "DISCONNECTED":
             try:
                 await ws.close()
-            except:
+            except Exception:
                 pass
 
 @app.get("/stats")
 async def get_stats():
-    """System statistics"""
+    """Return system statistics."""
     return JSONResponse(content={
         "uptime": time.time(),
         "cpu_count": psutil.cpu_count(),
         "memory_total": psutil.virtual_memory().total,
-        "disk_usage": psutil.disk_usage('/').percent
+        "disk_usage": psutil.disk_usage('/').percent,
     })
 
 @app.get("/healthz")
@@ -192,46 +186,45 @@ async def metrics(request: Request):
     body = "\n".join(parts) + "\n"
     return PlainTextResponse(body, media_type="text/plain; version=0.0.4")
 
-# ML ile ilgili endpoint'ler
 @app.post("/ml/train")
 async def train_ml_model():
-    """Train ML model"""
+    """Train the ML model."""
     result = ml_model.train_models()
     return JSONResponse(content=result)
 
 @app.get("/ml/performance")
 async def get_ml_performance():
-    """Get ML model performance metrics"""
+    """Return ML model performance metrics."""
     metrics = ml_model.get_performance_metrics()
     return JSONResponse(content=metrics)
 
 @app.get("/ml/anomalies")
 async def get_recent_anomalies(limit: int = 10):
-    """Get recent anomaly detections"""
+    """Return recent anomaly detections."""
     anomalies = ml_model.get_recent_anomalies(limit)
     return JSONResponse(content=anomalies)
 
 @app.get("/settings")
 async def get_settings():
-    """Get current settings"""
+    """Return current settings."""
     return JSONResponse(content={
         "weather_lat": WEATHER_LAT,
         "weather_lon": WEATHER_LON,
         "weather_cache_ttl": WEATHER_CACHE_TTL,
         "ml_training_samples": len(ml_model.training_data),
-        "ml_is_trained": ml_model.is_trained
+        "ml_is_trained": ml_model.is_trained,
     })
 
 @app.post("/settings")
 async def update_settings(settings: dict):
-    """Update settings"""
+    """Update runtime settings."""
     global WEATHER_LAT, WEATHER_LON, WEATHER_CACHE_TTL
-    
+
     if "weather_lat" in settings:
         WEATHER_LAT = float(settings["weather_lat"])
     if "weather_lon" in settings:
         WEATHER_LON = float(settings["weather_lon"])
     if "weather_cache_ttl" in settings:
         WEATHER_CACHE_TTL = int(settings["weather_cache_ttl"])
-    
+
     return JSONResponse(content={"success": True, "message": "Settings updated"})
